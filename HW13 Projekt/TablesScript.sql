@@ -154,11 +154,22 @@ CREATE TABLE [dbo].[Group_Lab](
 	[Name_Gr_Lab] [nvarchar](100) NOT NULL,
 	[Room] [nvarchar](6) NULL,
 	[ModifiedDate] [datetime] NULL,
+	[Room2] [nvarchar](6) NULL,
  CONSTRAINT [AK_Lab] UNIQUE NONCLUSTERED 
 (
 	[Name_Gr_Lab] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[Group_Lab] ADD  CONSTRAINT [DF_Group_Lab_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
+GO
+
+ALTER TABLE [dbo].[Group_Lab]  WITH CHECK ADD  CONSTRAINT [Chk_LenRoom] CHECK  ((len([room2])>(2)))
+GO
+
+ALTER TABLE [dbo].[Group_Lab] CHECK CONSTRAINT [Chk_LenRoom]
+GO
 GO
 
 /****** Object:  Table [dbo].[Manufacturer]    Script Date: 27.05.2024 10:25:46 ******/
