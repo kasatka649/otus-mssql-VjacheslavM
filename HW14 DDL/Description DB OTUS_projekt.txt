@@ -1,0 +1,69 @@
+Описание базы данных OTUS_Projekt
+(в 3-й нормальной форме)
+База учета реактивов фармкомпании.
+
+Reagent - таблица с названиями реактивов 
+Feature - таблица со свойствами реактивов
+Batch – таблица учета партий реактивов
+SubBatch - таблица учета подпартий реактивов (например, партия состоит из флаконов, а подпартия – объем этих флаконов.)
+Documents – документы, связанные с реактивом (паспорт, инструкция, накладная…)
+TypeDoc – тип документа.
+Group_Lab – список лабораторий, к которым относятся пользователи.
+Suppliers – поставщики реактивов
+Manufacturer- изготовитель реактива
+UnitMeasure – меры измерения
+Util – таблица учета списанных партий реактивов.
+Все действия (Insert, delete, update) выполняются c помощью хранимых процедур.
+Целостность данных обеспечивается за счет FK и тригеров отдельных таблиц.
+Доступ к базе и права для работы с данными в соответствии с ролью уч. записи:
+ [DB_admin]
+ [DB_Supervisor]
+ [DB_User]
+Employee – таблица учета пользователей БД.
+EmpPs - таблица паролей пользователей (шифрование пароля:HPSWD=HASHBYTES('SHA2_512', @PSWD+CAST(Salt AS NVARCHAR(36))))
+Прилагаю скрипты с триггерами и процедурами. 
+Проект небольшой, названия интуитивно понятные, на мой взгляд. Но буду в дальнейшем чаще применять другие схемы, не только dbo. 
+В дальнейшем буду придерживаться одинакового типа в названиях полей- идентификаторов.
+Я тестирую работу БД с помощью VBA, ту пользователей будет сервер-клиентское приложение, написанное на Java/Kotlin.
+
+Index:
+CREATE UNIQUE INDEX indexReagent ON dbo.Reagent (Reag_Name DESC, Catalog_num ASC, Series_num DESC);
+CREATE UNIQUE INDEX indexEmployee ON dbo.[employee] (fname , minit , lname );
+
+Ограничения (примеры):
+Check:
+TABLE [dbo].[Group_Lab]  WITH CHECK ADD  CONSTRAINT [Chk_LenRoom] CHECK  ((len([room2])>(2)))
+
+UNIQUE NONCLUSTERED:
+1.table Employee
+ CONSTRAINT [AK_user] UNIQUE NONCLUSTERED ([user] ASC)
+2.table EmpPs 
+[EMP_ID] [int] NOT NULL
+[Salt] [uniqueidentifier] NULL
+3.table Group_Lab 
+CONSTRAINT [AK_Lab] UNIQUE NONCLUSTERED 
+(	[Name_Gr_Lab] ASC)
+4.table Manufacturer
+CONSTRAINT [AK_Manuf] UNIQUE NONCLUSTERED 
+(	[Manufacturer] ASC)
+5.table Suppliers
+ CONSTRAINT [AK_CompanyName] UNIQUE NONCLUSTERED 
+(	[CompanyName] ASC)
+
+FOREIGN KEYs:
+TABLE [dbo].[Batch]  - CONSTRAINT [FK_Batch_Manuf] FOREIGN KEY([Manuf_ID])
+REFERENCES [dbo].[Manufacturer] ([Manuf_ID])
+
+CONSTRAINT [FK_Batch_Reag] FOREIGN KEY([ID_Reag])
+REFERENCES [dbo].[Reagent] ([ID_reag])
+
+CONSTRAINT [FK_Batch_Supplier] FOREIGN KEY([ID_Supplier])
+REFERENCES [dbo].[Suppliers] ([ID_Supplier])
+
+CONSTRAINT [FK_Batch_UnitMeasure] FOREIGN KEY([UnitMeasureCode])
+REFERENCES [dbo].[UnitMeasure] ([UnitMeasureCode])
+
+CONSTRAINT [FK_Documents_ReagID] FOREIGN KEY([ID_Reag])
+REFERENCES [dbo].[Reagent] ([ID_reag])
+
+PRIMARY KEYs - почти в каждой таблице
