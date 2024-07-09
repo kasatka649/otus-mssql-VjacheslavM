@@ -223,9 +223,10 @@ FROM Warehouse.StockItems;
 ... where ... Tags like '%Vintage%'
 ... where ... CustomFields like '%Vintage%' 
 */
-SELECT 
+SELECT
     StockItemID,  
 	StockItemName,
-CustomFields
+     JSON_QUERY(CustomFields, '$.Tags') AS PurchaseSites
 FROM Warehouse.StockItems
-WHERE 	JSON_VALUE(CustomFields, '$.Tags[0]')='Vintage'
+CROSS APPLY OPENJSON(CustomFields, '$.Tags') oj
+WHERE oj.value='Vintage';
